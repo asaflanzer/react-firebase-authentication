@@ -1,54 +1,79 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-
-import { AuthUserContext } from '../Session';
 import SignOutButton from '../SignOut';
 import * as ROUTES from '../../constants/routes';
-import * as ROLES from '../../constants/roles';
+import { AuthUserContext } from '../Session';
+import { Navbar, Nav, Form, FormControl,
+Button, NavDropdown, Row, Col } from 'react-bootstrap';
+import { withFirebase } from '../Firebase';
 
-const Navigation = () => (
-  <AuthUserContext.Consumer>
-    {authUser =>
-      authUser ? (
-        <NavigationAuth authUser={authUser} />
-      ) : (
-        <NavigationNonAuth />
-      )
-    }
-  </AuthUserContext.Consumer>
-);
+class Navigation extends Component {
+  constructor(props) {
+    super(props);
+  }
+  
+// componentDidMount() {
+//     fetch(url).then(results => {
+//         // Do something with the results
+//     })
+// }
 
-const NavigationAuth = ({ authUser }) => (
-  <ul>
-    <li>
-      <Link to={ROUTES.LANDING}>Landing</Link>
-    </li>
-    <li>
-      <Link to={ROUTES.HOME}>Home</Link>
-    </li>
-    <li>
-      <Link to={ROUTES.ACCOUNT}>Account</Link>
-    </li>
-    {!!authUser.roles[ROLES.ADMIN] && (
-      <li>
-        <Link to={ROUTES.ADMIN}>Admin</Link>
-      </li>
-    )}
-    <li>
-      <SignOutButton />
-    </li>
-  </ul>
-);
+  render() {
+    return (
+        <AuthUserContext.Consumer>
+          {authUser => authUser
+            ?
+            <Navbar user={authUser.email} firebase={this.props.firebase} collapseOnSelect expand="lg" bg="light" variant="light">
+              <Navbar.Brand href={ROUTES.LANDING}>Dev Dashboard</Navbar.Brand>
+              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+              <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="mr-auto">
+                  <Nav.Link href={ROUTES.LANDING}>Landing</Nav.Link>
+                  <Nav.Link href={ROUTES.HOME}>Home</Nav.Link>
+                  <NavDropdown title={authUser.email} id="basic-nav-dropdown">
+                    <NavDropdown.Item href={ROUTES.ACCOUNT}>Settings</NavDropdown.Item>
+                    <NavDropdown.Item href={ROUTES.ADMIN}>Admin</NavDropdown.Item>
+                    <NavDropdown.Divider />
+                    <SignOutButton />
+                  </NavDropdown>
+                </Nav>
+              </Navbar.Collapse>
+              <Form inline>
+                <Row>
+                  <Col xs={8}>
+                    <FormControl type="text" placeholder="Search" className="mr-sm-2" />
+                  </Col>
+                  <Col xs={4}>
+                    <Button variant="outline-primary" className="">Search</Button>
+                  </Col>
+                </Row>
+              </Form>
+            </Navbar>
+            :
+            <Navbar collapseOnSelect expand="lg" bg="light" variant="light">
+              <Navbar.Brand href={ROUTES.LANDING}>Dev Dashboard</Navbar.Brand>
+              <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+              <Navbar.Collapse id="responsive-navbar-nav">
+                <Nav className="mr-auto">
+                  <Nav.Link href={ROUTES.LANDING}>Landing</Nav.Link>
+                  <Nav.Link href={ROUTES.SIGN_IN}>Sign In</Nav.Link>
+                </Nav>
+              </Navbar.Collapse>
+              <Form inline>
+                <Row>
+                  <Col xs={8}>
+                    <FormControl type="text" placeholder="Search" className="mr-sm-2" />
+                  </Col>
+                  <Col xs={4}>
+                    <Button variant="outline-primary" className="">Search</Button>
+                  </Col>
+                </Row>
+              </Form>
+            </Navbar>
+          }
+        </AuthUserContext.Consumer>
+    )
+  }
+}
 
-const NavigationNonAuth = () => (
-  <ul>
-    <li>
-      <Link to={ROUTES.LANDING}>Landing</Link>
-    </li>
-    <li>
-      <Link to={ROUTES.SIGN_IN}>Sign In</Link>
-    </li>
-  </ul>
-);
-
-export default Navigation;
+export default withFirebase(Navigation);
